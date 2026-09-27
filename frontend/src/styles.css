@@ -1255,3 +1255,43 @@ section label {
   color: #999;
   margin-right: 6px;
 }
+.undo-delete {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+
+  background: white;
+  color: #333;
+
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+
+  font-size: 13px;
+}
+
+.undo-delete button {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.undo-delete button:hover {
+  text-decoration: underline;
+}
+
+.layout.dark-mode ~ .undo-delete {
+  background: #242424;
+  color: #eee;
+  border-color: #3a3a3a;
+}

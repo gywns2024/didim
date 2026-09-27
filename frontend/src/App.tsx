@@ -82,6 +82,8 @@ function exportPrint() {
 export default function App() {
   const [cases, setCases] = useState<CaseItem[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+const [deleteTimer, setDeleteTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [assessment, setAssessment] = useState<Assessment>(initialAssessment);
@@ -287,14 +289,43 @@ export default function App() {
   }
 
   async function del() {
-    if (!selected || !confirm("이 상담 기록을 삭제할까요?")) return;
-    await removeCase(selected);
-    setSelected(null);
-    setMessages([]);
-    setAttachments([]);
-    await refresh();
+  if (!selected || !confirm("이 상담 기록을 삭제할까요?")) return;
+
+  const targetId = selected;
+
+  setDeleteTarget(targetId);
+  setSelected(null);
+  setMessages([]);
+  setAttachments([]);
+
+  const timer = setTimeout(async () => {
+    try {
+      await removeCase(targetId);
+      setDeleteTarget(null);
+      setDeleteTimer(null);
+      await refresh();
+    } catch {
+      setError("상담 삭제에 실패했습니다.");
+      setDeleteTarget(null);
+      setDeleteTimer(null);
+      await refresh();
+    }
+  }, 5000);
+
+  setDeleteTimer(timer);
+}
+function undoDelete() {
+  if (deleteTimer) {
+    clearTimeout(deleteTimer);
   }
 
+  setDeleteTarget(null);
+  setDeleteTimer(null);
+
+  refresh().catch(() => {
+    setError("상담 목록을 불러오지 못했습니다.");
+  });
+}
   async function send(e?: FormEvent, forcedContent?: string) {
     e?.preventDefault();
 
@@ -369,6 +400,14 @@ export default function App() {
   // ---------- 렌더 ----------
   return (
     <main className="app-shell">
+      {deleteTarget !== null && (
+  <div className="undo-delete">
+    <span>상담을 삭제할 예정입니다.</span>
+    <button type="button" onClick={undoDelete}>
+      삭제 취소
+    </button>
+  </div>
+)}
       <header className="titlebar">
         <img className="logo-sm" src="/icons/icon.svg" alt="디딤" />
         디딤 — 교권 침해 상담 도우미
